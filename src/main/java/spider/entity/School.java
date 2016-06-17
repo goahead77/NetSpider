@@ -19,4 +19,6 @@ public class School {
     @Lob
     private String sDesc;
     private String address;
+    private String province;
+    private String level;
 }

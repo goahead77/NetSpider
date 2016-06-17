@@ -22,7 +22,7 @@ public class JpaConfig {
     private static String DRIVER_NAME="com.mysql.jdbc.Driver";
     private static String URL="jdbc:mysql://localhost:3306/school?useUnicode=true&characterEncoding=UTF8&autoReconnect=true";
     private static String USERNAME="root";
-    private static String PASSWORD="sa";
+    private static String PASSWORD="1234";//sa
 
     @Bean
     public DataSource dataSource(){

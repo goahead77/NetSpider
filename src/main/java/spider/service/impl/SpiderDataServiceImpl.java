@@ -42,27 +42,31 @@ public class SpiderDataServiceImpl implements SpiderDataService {
 
     @Override
     public  void spider() throws IOException {
-        List<String> cities=getCities();
-        for(String city:cities){
-            for(String level:levels){
-                int page=getPage(city,level);
-                for(int i=1;i<=page;i++){
-                    schools(city,level,i);
+        List<String> provinces= getProvinces();
+        try{
+            for(String province:provinces){
+                for(String level:levels){
+                    int page=getPage(province,level);
+                    for(int i=1;i<=page;i++){
+                        schools(province,level,i);
+                    }
                 }
             }
+        }finally {
+            webClient.close();
         }
     }
-    private List<String> getCities() throws IOException {
+    private List<String> getProvinces() throws IOException {
         HtmlPage page=webClient.getPage(MAIN_URL);
         HtmlSelect province = (HtmlSelect) page.getByXPath("//select[@name='province']").get(0);
         List<HtmlOption> options=province.getOptions();
-        List<String> citys= options.stream().map(HtmlOption::getText).collect(Collectors.toList());
-        return citys;
+        List<String> provinces= options.stream().map(HtmlOption::getText).collect(Collectors.toList());
+        return provinces;
     }
 
-    private int getPage(String city,String level) throws IOException {
+    private int getPage(String province,String level) throws IOException {
         int perPageNum=5;//根绝页面可以看到，每页显示的数目是5条
-        String url=String.format(GET_SCHOOL, URLEncoder.encode(level,"utf-8"),URLEncoder.encode(city,"utf-8"),1);
+        String url=String.format(GET_SCHOOL, URLEncoder.encode(level,"utf-8"),URLEncoder.encode(province,"utf-8"),1);
         HtmlPage page=webClient.getPage(url);
         logger.info(page.asText());
         HtmlFont font=(HtmlFont)page.getByXPath("//font[@color='red']").get(0);//
@@ -74,13 +78,13 @@ public class SpiderDataServiceImpl implements SpiderDataService {
 
     /**
      * 抓取到所有学校信息，并持久化
-     * @param cityName 城市名称
+     * @param province 省
      * @param level 层次
      * @param pageNum 页数
      * @throws IOException 异常
      */
-    private void schools(String cityName,String level,int pageNum) throws IOException {
-        String url=String.format(GET_SCHOOL,URLEncoder.encode(level,"utf-8"),URLEncoder.encode(cityName,"utf-8"),pageNum);
+    private void schools(String province,String level,int pageNum) throws IOException {
+        String url=String.format(GET_SCHOOL,URLEncoder.encode(level,"utf-8"),URLEncoder.encode(province,"utf-8"),pageNum);
         HtmlPage page=webClient.getPage(url);
         List<HtmlDivision> divisions= (List<HtmlDivision>) page.getByXPath("//div[@class='right_box']");
         List<HtmlAnchor> htmlAnchors= (List<HtmlAnchor>) page.getByXPath("//a[@style='color: #D34803;']");
@@ -129,6 +133,8 @@ public class SpiderDataServiceImpl implements SpiderDataService {
             }
             logger.info("学校名称："+htmlAnchor.getTextContent());
             school.setSName(htmlAnchor.getTextContent());
+            school.setLevel(level);
+            school.setProvince(province);
             schoolRepository.save(school);
         }
     }
