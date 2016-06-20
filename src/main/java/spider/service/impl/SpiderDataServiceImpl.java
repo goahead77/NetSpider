@@ -151,6 +151,4 @@ public class SpiderDataServiceImpl implements SpiderDataService {
         }
         return old;
     }
-
-    //TODO 将抓取到的数据存到数据库中，便可大功告成！
 }

@@ -21,4 +21,18 @@ public class School {
     private String address;
     private String province;
     private String level;
+
+    @Override
+    public String toString() {
+        return "School{" +
+                "sId=" + sId +
+                ", sName='" + sName + '\'' +
+                ", postCode='" + postCode + '\'' +
+                ", sTel='" + sTel + '\'' +
+                ", sDesc='" + sDesc + '\'' +
+                ", address='" + address + '\'' +
+                ", province='" + province + '\'' +
+                ", level='" + level + '\'' +
+                '}';
+    }
 }
