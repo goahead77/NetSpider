@@ -42,16 +42,18 @@ public class SpiderDataServiceImpl implements SpiderDataService {
 
     @Override
     public  void spider() throws IOException {
-        List<String> provinces= getProvinces();
-        try{
-            for(String province:provinces){
-                for(String level:levels){
-                    int page=getPage(province,level);
-                    for(int i=1;i<=page;i++){
-                        schools(province,level,i);
+        try {
+            List<String> provinces = getProvinces();
+            for (String province : provinces) {
+                for (String level : levels) {
+                    int page = getPage(province, level);
+                    for (int i = 1; i <= page; i++) {
+                        schools(province, level, i);
                     }
                 }
             }
+        }catch (Exception ex){
+            logger.error(ex.getMessage());
         }finally {
             webClient.close();
         }
