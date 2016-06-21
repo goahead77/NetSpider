@@ -40,7 +40,7 @@ public class SpiderDataServiceImpl implements SpiderDataService {
         webClient=new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setJavaScriptEnabled(false);
         webClient.getOptions().setCssEnabled(false);
-        webClient.getOptions().setTimeout(1*60*1000);//超时设置1分钟
+        webClient.getOptions().setTimeout(10*60*1000);//超时设置1分钟
     }
 
     public  void spider() throws IOException {
@@ -56,6 +56,7 @@ public class SpiderDataServiceImpl implements SpiderDataService {
     }
     private List<String> getProvinces() throws IOException {
         HtmlPage page=webClient.getPage(MAIN_URL);
+        logger.info("超时时间："+webClient.getOptions().getTimeout());
         HtmlSelect province = (HtmlSelect) page.getByXPath("//select[@name='province']").get(0);
         List<HtmlOption> options=province.getOptions();
         List<String> provinces= options.stream().map(HtmlOption::getText).collect(Collectors.toList());
