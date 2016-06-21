@@ -34,9 +34,10 @@ public class Spider{
     @Test
     public void get(){
         try {
-            spiderDataService.spider();
+            spiderDataService.run();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }

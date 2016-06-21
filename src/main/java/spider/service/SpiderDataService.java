@@ -9,5 +9,5 @@ import java.io.IOException;
 
 
 public interface SpiderDataService {
-    void spider() throws IOException;
+    void run() throws IOException;
 }

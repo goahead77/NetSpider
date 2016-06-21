@@ -1,5 +1,6 @@
 package spider.service.impl;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
 import org.slf4j.Logger;
@@ -36,13 +37,13 @@ public class SpiderDataServiceImpl implements SpiderDataService {
     private static final String EN_COLON="\uff1a";//表示英文状态下的分号
 
     static {
-        webClient=new WebClient();
-        webClient.setJavaScriptTimeout(0);
+        webClient=new WebClient(BrowserVersion.CHROME);
+        webClient.getOptions().setJavaScriptEnabled(false);
+        webClient.getOptions().setCssEnabled(false);
+        webClient.getOptions().setTimeout(1*60*1000);//超时设置1分钟
     }
 
-    @Override
     public  void spider() throws IOException {
-        try {
             List<String> provinces = getProvinces();
             for (String province : provinces) {
                 for (String level : levels) {
@@ -52,11 +53,6 @@ public class SpiderDataServiceImpl implements SpiderDataService {
                     }
                 }
             }
-        }catch (Exception ex){
-            logger.error(ex.getMessage());
-        }finally {
-            webClient.close();
-        }
     }
     private List<String> getProvinces() throws IOException {
         HtmlPage page=webClient.getPage(MAIN_URL);
@@ -124,16 +120,20 @@ public class SpiderDataServiceImpl implements SpiderDataService {
             htmlAnchor=htmlAnchors.get(i);
             detailUrl=htmlAnchor.getAttribute("href");
             detailUrl=detailUrl.replace("index","intro");
-            page=webClient.getPage(detailUrl);
-            if(page.getByXPath("//div[@class='pad_20 line_22']").size()>0){
-                htmlDivision= (HtmlDivision) page.getByXPath("//div[@class='pad_20 line_22']").get(0);
-                logger.info("学校简介："+htmlDivision.getTextContent().trim());
-                school.setSDesc(htmlDivision.getTextContent().trim());
-            }else{
-                logger.info("学校简介：暂无！");
-                school.setSDesc("暂无！");
+            try {
+                page = webClient.getPage(detailUrl);
+                if (page.getByXPath("//div[@class='pad_20 line_22']").size() > 0) {
+                    htmlDivision = (HtmlDivision) page.getByXPath("//div[@class='pad_20 line_22']").get(0);
+                    logger.info("学校简介：" + htmlDivision.getTextContent().trim());
+                    school.setSDesc(htmlDivision.getTextContent().trim());
+                } else {
+                    logger.info("学校简介：暂无！");
+                    school.setSDesc("暂无！");
+                }
+                logger.info("学校名称：" + htmlAnchor.getTextContent());
+            }catch (Exception ex){
+                logger.error(ex.getMessage());
             }
-            logger.info("学校名称："+htmlAnchor.getTextContent());
             school.setSName(htmlAnchor.getTextContent());
             school.setLevel(level);
             school.setProvince(province);
@@ -152,5 +152,15 @@ public class SpiderDataServiceImpl implements SpiderDataService {
             return "未知";
         }
         return old;
+    }
+
+    public void run() {
+        try {
+            spider();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            webClient.close();
+        }
     }
 }
